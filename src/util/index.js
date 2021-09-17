@@ -20,7 +20,7 @@ const footer = `</body>
 </html>
 `;
 
-const pathDelimeter = process.platform !== 'win32' ? '/' : '\\';
+const pathDelimeter = '/'; //process.platform !== 'win32' ? '/' : '\\';
 
 const convertToHTML = (fileInfo, cssUrl) => {
     return new Promise((resolve, reject) => {
@@ -68,12 +68,17 @@ exports.convertFilesToHTML = async (filename, cssUrl, outputDir) => {
             fileInfos.push(filename);
         }
         console.log(fileInfos);
+        const linkTags = [];
+        linkTags.push(`<h1>${filename} - Information</h1><\n>`)
         for(const file of fileInfos) {
-            const filename = file.split(pathDelimeter)[file.split(pathDelimeter).length - 1].split('.')[0];
+            const name = file.split(pathDelimeter)[file.split(pathDelimeter).length - 1].split('.')[0];
+            console.log("file:", name);
+            linkTags.push(`<a href="./${name}.html">${name}</a><br>\n`);
             convertToHTML(file, cssUrl).then(html => {
-                saveToFile(html, outputDir, filename);
+                saveToFile(html, outputDir, name);
             });
         }
+        saveToFile(header('ssg-html', cssUrl) + linkTags.join("") + footer, outputDir, 'index');
     } catch(err) {
         console.log(chalk.red(err.message));
     }
